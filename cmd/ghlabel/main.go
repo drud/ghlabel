@@ -33,10 +33,10 @@ func main() {
 	}
 
 	switch action {
-	case "stage":
-		fmt.Print("User would like to stage changes.")
-	case "execute":
-		processAllRepos(ctx, cli, owner, parentLabels)
+	case "preview":
+		previewAllRepos(ctx, cli, owner, parentLabels)
+	case "run":
+		updateAllRepos(ctx, cli, owner, parentLabels)
 	}
 }
 
@@ -151,31 +151,72 @@ func getLabels(ctx context.Context, client *github.Client, owner string, repo st
 	return labelsMap
 }
 
-func processAllRepos(ctx context.Context, client *github.Client, owner string, parentLabels map[string]label) {
-	//opt := &github.RepositoryListByOrgOptions{
-	//	ListOptions: github.ListOptions{PerPage: 10},
-	//	Type:        "all",
-	//}
-	//
+func previewAllRepos(ctx context.Context, client *github.Client, owner string, parentLabels map[string]label) {
+	opt := &github.RepositoryListByOrgOptions{
+		ListOptions: github.ListOptions{PerPage: 10},
+		Type:        "all",
+	}
+
+	fmt.Printf("\nOwner: %s\n\n", owner)
+	fmt.Println("             CHANGES STAGED FOR COMMIT             ")
+	fmt.Println("===================================================")
+	fmt.Printf("| %-28s| %-18s\n", "REPOSITORY", "ACTIONABLE")
+	fmt.Print("===================================================")
+
 	for {
-		//repos, resp, err := client.Repositories.ListByOrg(ctx, owner, opt)
-		repos, _, err := client.Repositories.List(ctx, "nmccrory", nil)
+		repos, resp, err := client.Repositories.ListByOrg(ctx, owner, opt)
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		for _, repo := range repos {
 			currentLabels := getLabels(ctx, client, owner, repo.GetName())
 			targetLabels := processLabels(parentLabels, currentLabels)
-			fmt.Printf("\n %s/%s \n", owner, repo.GetName())
-			r, _ := json.MarshalIndent(targetLabels, "", "  ")
-			fmt.Println(string(r))
-			commit(ctx, client, owner, repo.GetName(), targetLabels)
+			fmt.Printf("\n| %-28s", repo.GetName())
+			r, _ := json.MarshalIndent(targetLabels, "|                             |", "  ")
+			fmt.Printf("| %-18s\n", string(r))
+			fmt.Print("---------------------------------------------------")
 		}
-		break
-		//if resp.NextPage == 0 {
-		//	break
-		//}
-		//opt.ListOptions.Page = resp.NextPage
+
+		if resp.NextPage == 0 {
+			fmt.Printf("\n\nRun `ghlabel --owner --parent run` to proceed with these changes.\n\n")
+			break
+		}
+		opt.ListOptions.Page = resp.NextPage
+	}
+}
+
+func updateAllRepos(ctx context.Context, client *github.Client, owner string, parentLabels map[string]label) {
+	opt := &github.RepositoryListByOrgOptions{
+		ListOptions: github.ListOptions{PerPage: 10},
+		Type:        "all",
 	}
 
+	fmt.Printf("\nOwner: %s\n\n", owner)
+	fmt.Println("               UPDATING REPOSITORIES              ")
+	fmt.Println("===================================================")
+	fmt.Printf("| %-28s| %-18s\n", "REPOSITORY", "ACTIONABLE")
+	fmt.Print("===================================================")
+
+	for {
+		repos, resp, err := client.Repositories.ListByOrg(ctx, owner, opt)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, repo := range repos {
+			currentLabels := getLabels(ctx, client, owner, repo.GetName())
+			targetLabels := processLabels(parentLabels, currentLabels)
+			commit(ctx, client, owner, repo.GetName(), targetLabels)
+			fmt.Printf("\n| %-28s", repo.GetName())
+			r, _ := json.MarshalIndent(targetLabels, "|                             |", "  ")
+			fmt.Printf("| %-18s\n", string(r))
+			fmt.Print("---------------------------------------------------")
+		}
+		if resp.NextPage == 0 {
+			fmt.Printf("\n")
+			break
+		}
+		opt.ListOptions.Page = resp.NextPage
+	}
 }
