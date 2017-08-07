@@ -35,7 +35,7 @@ func main() {
 	switch action {
 	case "preview":
 		previewAllRepos(ctx, cli, owner, parentLabels)
-	case "run":
+	case "":
 		updateAllRepos(ctx, cli, owner, parentLabels)
 	}
 }
@@ -46,9 +46,7 @@ func parseFlags() (owner string, repo string, parent string, action string) {
 	flag.StringVar(&parent, "parent", "", "The repository to replicate labels from.")
 	flag.Parse()
 	action = flag.Arg(0)
-	if action == "" {
-		log.Fatal("Please specify if you are previewing or executing changes.")
-	}
+
 	if owner == "" {
 		log.Fatal("The owner flag is required. Use -h for help.")
 	}
@@ -214,7 +212,7 @@ func updateAllRepos(ctx context.Context, client *github.Client, owner string, pa
 			fmt.Print("---------------------------------------------------")
 		}
 		if resp.NextPage == 0 {
-			fmt.Printf("\n")
+			fmt.Printf("\nSuccessfully updated labels.\n")
 			break
 		}
 		opt.ListOptions.Page = resp.NextPage
