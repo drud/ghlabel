@@ -8,6 +8,10 @@ Set the $GITHUB_TOKEN environment variable using a GitHub API Key.
 The tool currently supports two modes; `preview` and `run`.
 
 Using preview mode allows you to see label changes before they are executed. It's called like this:
-```./ghlabel --owner=drud --parent=community preview```
+```
+./ghlabel --owner=drud --parent=community preview
+```
 Intuitively, run mode will execute the changes staged in preview.
-```./ghlabel --owner=drud --parent=community run```
+```
+./ghlabel --owner=drud --parent=community run
+```
