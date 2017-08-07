@@ -23,30 +23,39 @@ type label struct {
 func main() {
 	ctx, cli := getClient()
 
-	owner, repo, parent := parseFlags()
+	owner, repo, parent, action := parseFlags()
 	parentLabels := getLabels(ctx, cli, owner, parent)
 	if repo != "" {
 		currentLabels := getLabels(ctx, cli, owner, repo)
 		targetLabels := processLabels(parentLabels, currentLabels)
 		commit(ctx, cli, owner, repo, targetLabels)
+		return
+	}
 
-	} else {
+	switch action {
+	case "stage":
+		fmt.Print("User would like to stage changes.")
+	case "execute":
 		processAllRepos(ctx, cli, owner, parentLabels)
 	}
 }
 
-func parseFlags() (owner string, repo string, parent string) {
+func parseFlags() (owner string, repo string, parent string, action string) {
 	flag.StringVar(&owner, "owner", "", "The organization or user that owns the repositories.")
 	flag.StringVar(&repo, "repo", "", "A specific repository to focus on.")
 	flag.StringVar(&parent, "parent", "", "The repository to replicate labels from.")
 	flag.Parse()
+	action = flag.Arg(0)
+	if action == "" {
+		log.Fatal("Please specify if you are previewing or executing changes.")
+	}
 	if owner == "" {
 		log.Fatal("The owner flag is required. Use -h for help.")
 	}
 	if parent == "" {
 		log.Fatal("The parent flag is required. Use -h for help.")
 	}
-	return owner, repo, parent
+	return owner, repo, parent, action
 }
 
 func getClient() (ctx context.Context, cli *github.Client) {
@@ -84,7 +93,6 @@ func commit(ctx context.Context, client *github.Client, owner string, repo strin
 			client.Issues.DeleteLabel(ctx, owner, repo, v.Name)
 		}
 	}
-
 }
 
 func processLabels(parent map[string]label, current map[string]label) map[string]label {
@@ -120,6 +128,7 @@ func processLabels(parent map[string]label, current map[string]label) map[string
 	return labelsMap
 }
 
+// Get the currently available label set for a repository.
 func getLabels(ctx context.Context, client *github.Client, owner string, repo string) map[string]label {
 	labelsMap := make(map[string]label)
 	opt := &github.ListOptions{
@@ -143,29 +152,30 @@ func getLabels(ctx context.Context, client *github.Client, owner string, repo st
 }
 
 func processAllRepos(ctx context.Context, client *github.Client, owner string, parentLabels map[string]label) {
-	opt := &github.RepositoryListByOrgOptions{
-		ListOptions: github.ListOptions{PerPage: 10},
-		Type:        "all",
-	}
-
+	//opt := &github.RepositoryListByOrgOptions{
+	//	ListOptions: github.ListOptions{PerPage: 10},
+	//	Type:        "all",
+	//}
+	//
 	for {
-		repos, resp, err := client.Repositories.ListByOrg(ctx, owner, opt)
-
+		//repos, resp, err := client.Repositories.ListByOrg(ctx, owner, opt)
+		repos, _, err := client.Repositories.List(ctx, "nmccrory", nil)
 		if err != nil {
 			log.Fatal(err)
 		}
 		for _, repo := range repos {
 			currentLabels := getLabels(ctx, client, owner, repo.GetName())
 			targetLabels := processLabels(parentLabels, currentLabels)
-			fmt.Printf("\n###### actionable labels for %s/%s ######\n", owner, repo.GetName())
+			fmt.Printf("\n %s/%s \n", owner, repo.GetName())
 			r, _ := json.MarshalIndent(targetLabels, "", "  ")
 			fmt.Println(string(r))
 			commit(ctx, client, owner, repo.GetName(), targetLabels)
 		}
-		if resp.NextPage == 0 {
-			break
-		}
-		opt.ListOptions.Page = resp.NextPage
+		break
+		//if resp.NextPage == 0 {
+		//	break
+		//}
+		//opt.ListOptions.Page = resp.NextPage
 	}
 
 }

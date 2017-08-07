@@ -78,7 +78,7 @@ func createRepo(ctx context.Context, cli *github.Client, org string, name string
 	repo := &github.Repository{
 		Name:    github.String(name),
 		Private: github.Bool(true),
-		HasIssues: github.Bool(true)
+		HasIssues: github.Bool(true),
 	}
 
 	return cli.Repositories.Create(ctx, org, repo)
