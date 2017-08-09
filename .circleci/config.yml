@@ -1,0 +1,16 @@
+version: 2
+stages:
+  build:
+    machine: true
+    working_directory: /home/circleci/go/src/github.com/drud/ghlabel
+
+    environment:
+      GOPATH: /home/circleci/go
+
+    steps:
+      - run: mkdir -p ~/go/src/github.com/drud/ghlabel && mkdir -p ~/go/lib && mkdir -p ~/go/bin
+
+      - checkout
+
+      - run: make test
+      - run: make -s gofmt golint

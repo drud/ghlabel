@@ -1,21 +1,20 @@
 # ghlabel
-A CLT to manage GitHub labels in accordance with [community guidelines](https://github.com/drud/community/blob/master/development/issue_workflow.md#labels).
+Since all company projects must abide by the [Drud community guidelines]
+(https://github.com/drud/community/blob/master/development/issue_workflow.md#labels),
+it makes sense to automate some processes. Hence, Ghlabel.
 
-## Setup
-Clone this repository and `cd` into the project. Once you're in the project's root folder, run `make <your_sys_arch>`.
-Set the $GITHUB_TOKEN environment variable using a GitHub API Key.
-```
-export GITHUB_TOKEN=12345...
-```
+Ghlabel is a tool that automatically standardizes GitHub issue labels across a user or organization's repositories.
+A reference repository is used as the template for labels, and those labels are automatically copied to all or
+a single repository.
 
 ## Usage
-The tool currently allows you to preview and execute proposed label changes.
+The tool currently has two functions previewing staged label changes and applying them.
 
-Using preview mode allows you to see label changes before they are executed. It's called like this:
+Ghlabel runs in preview mode by default.:
 ```
-./ghlabel --owner=drud --parent=community preview
+./ghlabel --org=drud --ref=community
 ```
-Intuitively, you execute changes staged in preview mode by calling `ghlabel` with no arguments.
+You can execute changes using -r.
 ```
-./ghlabel --owner=drud --parent=community
+./ghlabel --org=drud --ref=community -r
 ```

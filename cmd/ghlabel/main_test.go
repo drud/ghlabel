@@ -76,8 +76,8 @@ func TestCredentials(t *testing.T) {
 func createRepo(ctx context.Context, cli *github.Client, org string, name string) (*github.Repository, *github.Response, error) {
 
 	repo := &github.Repository{
-		Name:    github.String(name),
-		Private: github.Bool(true),
+		Name:      github.String(name),
+		Private:   github.Bool(true),
 		HasIssues: github.Bool(true),
 	}
 

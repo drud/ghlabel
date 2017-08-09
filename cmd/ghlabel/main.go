@@ -3,16 +3,17 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"log"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
 )
 
-type label struct {
+// Label represents information about a GitHub issue label.
+type Label struct {
 	ID     int
 	URL    string
 	Name   string
@@ -20,54 +21,194 @@ type label struct {
 	Action string
 }
 
-func main() {
-	ctx, cli := getClient()
-
-	owner, repo, parent, action := parseFlags()
-	parentLabels := getLabels(ctx, cli, owner, parent)
-	if repo != "" {
-		currentLabels := getLabels(ctx, cli, owner, repo)
-		targetLabels := processLabels(parentLabels, currentLabels)
-		commit(ctx, cli, owner, repo, targetLabels)
-		return
-	}
-
-	switch action {
-	case "preview":
-		previewAllRepos(ctx, cli, owner, parentLabels)
-	case "":
-		updateAllRepos(ctx, cli, owner, parentLabels)
-	}
+// Client represents information about an instance of ghlabel.
+type Client struct {
+	// Command line context
+	Context context.Context
+	// Authenticated GitHub API client.
+	GitHub *github.Client
+	// User data
 }
 
-func parseFlags() (owner string, repo string, parent string, action string) {
-	flag.StringVar(&owner, "owner", "", "The organization or user that owns the repositories.")
-	flag.StringVar(&repo, "repo", "", "A specific repository to focus on.")
-	flag.StringVar(&parent, "parent", "", "The repository to replicate labels from.")
-	flag.Parse()
-	action = flag.Arg(0)
-
-	if owner == "" {
-		log.Fatal("The owner flag is required. Use -h for help.")
-	}
-	if parent == "" {
-		log.Fatal("The parent flag is required. Use -h for help.")
-	}
-	return owner, repo, parent, action
-}
-
-func getClient() (ctx context.Context, cli *github.Client) {
-	ctx = context.Background()
+// NewClient is the preferred method for making a new authenticated Client.
+func NewClient() *Client {
+	ctx := context.Background()
 	githubToken := os.Getenv("GITHUB_TOKEN")
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: githubToken},
 	)
 	tc := oauth2.NewClient(ctx, ts)
-	cli = github.NewClient(tc)
-	return ctx, cli
+	cli := github.NewClient(tc)
+
+	return &Client{Context: ctx, GitHub: cli}
 }
 
-func commit(ctx context.Context, client *github.Client, owner string, repo string, labels map[string]label) {
+// ListByUser lists repositories for a user.
+func (c *Client) ListByUser() {
+	if !Run {
+		printPreviewHeader()
+	}
+	referenceLabels := c.GetLabels(Reference, User)
+	opt := &github.RepositoryListOptions{
+		ListOptions: github.ListOptions{PerPage: 10},
+	}
+	for {
+		repos, resp, err := c.GitHub.Repositories.List(c.Context, User, opt)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, repo := range repos {
+			currentLabels := c.GetLabels(repo.GetName(), User)
+			targetLabels := processLabels(referenceLabels, currentLabels)
+			// If the run flag was used, execute the staged label changes
+			if Run {
+				commit(c.Context, c.GitHub, User, repo.GetName(), targetLabels)
+			}
+			printPreviewData(User, repo.GetName(), targetLabels)
+		}
+		if resp.NextPage == 0 {
+			break
+		}
+		opt.ListOptions.Page = resp.NextPage
+	}
+	fmt.Print("\nDone.\n")
+}
+
+// ListByUserRepository lists a single repository for a user.
+func (c *Client) ListByUserRepository() {
+	if !Run {
+		printPreviewHeader()
+	}
+	referenceLabels := c.GetLabels(Reference, User)
+	repo, _, err := c.GitHub.Repositories.Get(c.Context, User, Repository)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	currentLabels := c.GetLabels(repo.GetName(), User)
+	targetLabels := processLabels(referenceLabels, currentLabels)
+
+	// If the run flag was used, execute the staged label changes
+	if Run {
+		commit(c.Context, c.GitHub, User, repo.GetName(), targetLabels)
+	} else {
+		printPreviewData(User, repo.GetName(), targetLabels)
+	}
+	fmt.Print("\nDone.\n")
+}
+
+// ListByOrg lists repositories for an organization.
+func (c *Client) ListByOrg() {
+	if !Run {
+		printPreviewHeader()
+	}
+	referenceLabels := c.GetLabels(Reference, Organization)
+	opt := &github.RepositoryListByOrgOptions{
+		ListOptions: github.ListOptions{PerPage: 10},
+		Type:        "all",
+	}
+	for {
+		repos, resp, err := c.GitHub.Repositories.ListByOrg(c.Context, Organization, opt)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, repo := range repos {
+			currentLabels := c.GetLabels(repo.GetName(), Organization)
+			targetLabels := processLabels(referenceLabels, currentLabels)
+			// If the run flag was used, execute the staged label changes
+			if Run {
+				commit(c.Context, c.GitHub, Organization, repo.GetName(), targetLabels)
+			}
+			printPreviewData(Organization, repo.GetName(), targetLabels)
+		}
+		if resp.NextPage == 0 {
+			break
+		}
+		opt.ListOptions.Page = resp.NextPage
+	}
+	fmt.Print("\nDone.\n")
+}
+
+// ListByOrgRepository lists a single repository for an organization.
+func (c *Client) ListByOrgRepository() {
+	if !Run {
+		printPreviewHeader()
+	}
+	referenceLabels := c.GetLabels(Reference, Organization)
+	repo, _, err := c.GitHub.Repositories.Get(c.Context, Organization, Repository)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	currentLabels := c.GetLabels(repo.GetName(), Organization)
+	targetLabels := processLabels(referenceLabels, currentLabels)
+
+	// If the run flag was used, execute the staged label changes
+	if Run {
+		commit(c.Context, c.GitHub, Organization, repo.GetName(), targetLabels)
+	} else {
+		printPreviewData(Organization, repo.GetName(), targetLabels)
+	}
+	fmt.Print("\nDone.\n")
+}
+
+// GetLabels returns the currently available label set for a repository.
+func (c *Client) GetLabels(repo string, owner string) map[string]Label {
+	labelsMap := make(map[string]Label)
+	opt := &github.ListOptions{
+		PerPage: 10,
+	}
+	for {
+		labels, resp, err := c.GitHub.Issues.ListLabels(c.Context, owner, repo, opt)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, labelDetail := range labels {
+			labelsMap[labelDetail.GetName()] = Label{ID: labelDetail.GetID(), URL: labelDetail.GetURL(), Name: labelDetail.GetName(), Color: labelDetail.GetColor(), Action: ""}
+		}
+		if resp.NextPage == 0 {
+			break
+		}
+		opt.Page = resp.NextPage
+		break
+	}
+	return labelsMap
+}
+
+func validateFlags() bool {
+	if User == "" && Organization == "" {
+		log.Print("You must specify an owner using either the --user or --org flags. Use -h for help.")
+		return false
+	}
+	if Reference == "" {
+		log.Print("The reference flag is required. User -h for help.")
+		return false
+	}
+	return true
+}
+
+func printPreviewHeader() {
+	color.Yellow("Running in preview mode...\n\n")
+	fmt.Println("Description:")
+	fmt.Println("  View currently staged label updates.\n")
+	fmt.Println("Instructions:")
+	fmt.Println("  To apply label changes, use the -r flag.\n")
+}
+
+func printPreviewData(owner, repo string, targetLabels map[string]Label) {
+	if len(targetLabels) > 0 {
+		fmt.Println("\r+-------------------------------------------------+")
+		color.Green("%s/%s\n\n", owner, repo)
+		r, _ := json.MarshalIndent(targetLabels, "", "    ")
+		color.Green("%s\n", string(r))
+		return
+	}
+	fmt.Printf("\rScanning repository: %-36s", repo)
+}
+
+func commit(ctx context.Context, client *github.Client, owner string, repo string, labels map[string]Label) {
 	for _, v := range labels {
 		label := new(github.Label)
 
@@ -93,8 +234,8 @@ func commit(ctx context.Context, client *github.Client, owner string, repo strin
 	}
 }
 
-func processLabels(parent map[string]label, current map[string]label) map[string]label {
-	labelsMap := make(map[string]label)
+func processLabels(parent map[string]Label, current map[string]Label) map[string]Label {
+	labelsMap := make(map[string]Label)
 	// Move all parent items into labelsMap with action create
 	for k, v := range parent {
 		v.ID = 0
@@ -126,95 +267,9 @@ func processLabels(parent map[string]label, current map[string]label) map[string
 	return labelsMap
 }
 
-// Get the currently available label set for a repository.
-func getLabels(ctx context.Context, client *github.Client, owner string, repo string) map[string]label {
-	labelsMap := make(map[string]label)
-	opt := &github.ListOptions{
-		PerPage: 10,
-	}
-	for {
-		labels, resp, err := client.Issues.ListLabels(ctx, owner, repo, opt)
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, labelDetail := range labels {
-			labelsMap[labelDetail.GetName()] = label{ID: labelDetail.GetID(), URL: labelDetail.GetURL(), Name: labelDetail.GetName(), Color: labelDetail.GetColor(), Action: ""}
-		}
-		if resp.NextPage == 0 {
-			break
-		}
-		opt.Page = resp.NextPage
-		break
-	}
-	return labelsMap
-}
-
-func previewAllRepos(ctx context.Context, client *github.Client, owner string, parentLabels map[string]label) {
-	opt := &github.RepositoryListByOrgOptions{
-		ListOptions: github.ListOptions{PerPage: 10},
-		Type:        "all",
-	}
-
-	fmt.Printf("\nOwner: %s\n\n", owner)
-	fmt.Println("             CHANGES STAGED FOR COMMIT             ")
-	fmt.Println("===================================================")
-	fmt.Printf("| %-28s| %-18s\n", "REPOSITORY", "ACTIONABLE")
-	fmt.Print("===================================================")
-
-	for {
-		repos, resp, err := client.Repositories.ListByOrg(ctx, owner, opt)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		for _, repo := range repos {
-			currentLabels := getLabels(ctx, client, owner, repo.GetName())
-			targetLabels := processLabels(parentLabels, currentLabels)
-			fmt.Printf("\n| %-28s", repo.GetName())
-			r, _ := json.MarshalIndent(targetLabels, "|                             |", "  ")
-			fmt.Printf("| %-18s\n", string(r))
-			fmt.Print("---------------------------------------------------")
-		}
-
-		if resp.NextPage == 0 {
-			fmt.Printf("\n\nRun `ghlabel --owner --parent run` to proceed with these changes.\n\n")
-			break
-		}
-		opt.ListOptions.Page = resp.NextPage
-	}
-}
-
-func updateAllRepos(ctx context.Context, client *github.Client, owner string, parentLabels map[string]label) {
-	opt := &github.RepositoryListByOrgOptions{
-		ListOptions: github.ListOptions{PerPage: 10},
-		Type:        "all",
-	}
-
-	fmt.Printf("\nOwner: %s\n\n", owner)
-	fmt.Println("               UPDATING REPOSITORIES              ")
-	fmt.Println("===================================================")
-	fmt.Printf("| %-28s| %-18s\n", "REPOSITORY", "ACTIONABLE")
-	fmt.Print("===================================================")
-
-	for {
-		repos, resp, err := client.Repositories.ListByOrg(ctx, owner, opt)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		for _, repo := range repos {
-			currentLabels := getLabels(ctx, client, owner, repo.GetName())
-			targetLabels := processLabels(parentLabels, currentLabels)
-			commit(ctx, client, owner, repo.GetName(), targetLabels)
-			fmt.Printf("\n| %-28s", repo.GetName())
-			r, _ := json.MarshalIndent(targetLabels, "|                             |", "  ")
-			fmt.Printf("| %-18s\n", string(r))
-			fmt.Print("---------------------------------------------------")
-		}
-		if resp.NextPage == 0 {
-			fmt.Printf("\nSuccessfully updated labels.\n")
-			break
-		}
-		opt.ListOptions.Page = resp.NextPage
+func main() {
+	if err := RootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 }
