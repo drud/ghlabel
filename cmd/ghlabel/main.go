@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -9,7 +10,6 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/google/go-github/github"
-	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 )
 
@@ -64,8 +64,8 @@ func (c *Client) ListByUser() error {
 			return err
 		}
 		if resp.StatusCode != 200 {
-			return errors.Errorf("Client_ListByOrg: Failed %s request. Status %d.",
-				resp.Request.Method, resp.StatusCode)
+			return errors.New(fmt.Sprintf("Client_ListByUser: Failed %s request. Status %d.",
+				resp.Request.Method, resp.StatusCode))
 		}
 
 		for _, repo := range repos {
@@ -93,12 +93,10 @@ func (c *Client) ListByUserRepository() error {
 	}
 	referenceLabels := c.GetLabels(Reference, User)
 	repo, resp, err := c.GitHub.Repositories.Get(c.Context, User, Repository)
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	if resp.StatusCode != 200 {
-		return errors.Errorf("Client_ListByUserRepository: Failed %s request. Status %d.",
-			resp.Request.Method, resp.StatusCode)
+		return errors.New(fmt.Sprintf("Client_ListByUserRepository: Failed %s request. Status %d.",
+			resp.Request.Method, resp.StatusCode))
 	}
 
 	currentLabels := c.GetLabels(repo.GetName(), User)
@@ -130,8 +128,8 @@ func (c *Client) ListByOrg() error {
 			return err
 		}
 		if resp.StatusCode != 200 {
-			return errors.Errorf("Client_ListByOrg: Failed %s request. Status %d.",
-				resp.Request.Method, resp.StatusCode)
+			return errors.New(fmt.Sprintf("Client_ListByOrg: Failed %s request. Status %d.",
+				resp.Request.Method, resp.StatusCode))
 		}
 
 		for _, repo := range repos {
@@ -159,12 +157,10 @@ func (c *Client) ListByOrgRepository() error {
 	}
 	referenceLabels := c.GetLabels(Reference, Organization)
 	repo, resp, err := c.GitHub.Repositories.Get(c.Context, Organization, Repository)
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	if resp.StatusCode != 200 {
-		return errors.Errorf("Client_ListByOrgRepository: Failed %s request. Status %d.",
-			resp.Request.Method, resp.StatusCode)
+		return errors.New(fmt.Sprintf("Client_ListByOrgRepository: Failed %s request. Status %d.",
+			resp.Request.Method, resp.StatusCode))
 	}
 
 	currentLabels := c.GetLabels(repo.GetName(), Organization)
@@ -291,6 +287,20 @@ func processLabels(parent map[string]Label, current map[string]Label) map[string
 		}
 	}
 	return labelsMap
+}
+
+// errorString is a trivial implementation of error.
+type errorString struct {
+	s string
+}
+
+func (e *errorString) Error() string {
+	return e.s
+}
+
+// New returns an error that formats as the given text.
+func New(text string) error {
+	return &errorString{text}
 }
 
 func main() {
