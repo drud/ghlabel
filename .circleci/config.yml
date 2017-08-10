@@ -13,8 +13,6 @@ stages:
     steps:
       - run: mkdir -p ~/go/src/github.com/drud/ghlabel && mkdir -p ~/go/lib && mkdir -p ~/go/bin
 
-      - run: mkdir -p /artifacts && cp -a /bin/. /artifacts/
-
       - checkout
 
       - run: make -s gofmt golint
