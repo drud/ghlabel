@@ -10,6 +10,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
+	"github.com/pkg/errors"
 )
 
 // Label represents information about a GitHub issue label.
@@ -99,7 +100,7 @@ func (c *Client) ListByUserRepository() {
 }
 
 // ListByOrg lists repositories for an organization.
-func (c *Client) ListByOrg() {
+func (c *Client) ListByOrg() error {
 	if !Run {
 		printPreviewHeader()
 	}
@@ -110,8 +111,10 @@ func (c *Client) ListByOrg() {
 	}
 	for {
 		repos, resp, err := c.GitHub.Repositories.ListByOrg(c.Context, Organization, opt)
-		if err != nil {
-			log.Fatal(err)
+		if err != nil { return err }
+		if resp.StatusCode != 200 {
+			return errors.Errorf("Client_ListByOrg: Failed %s request. Status %d.",
+				resp.Request.Method, resp.StatusCode)
 		}
 
 		for _, repo := range repos {
@@ -129,17 +132,20 @@ func (c *Client) ListByOrg() {
 		opt.ListOptions.Page = resp.NextPage
 	}
 	fmt.Print("\nDone.\n")
+	return nil
 }
 
 // ListByOrgRepository lists a single repository for an organization.
-func (c *Client) ListByOrgRepository() {
+func (c *Client) ListByOrgRepository() error {
 	if !Run {
 		printPreviewHeader()
 	}
 	referenceLabels := c.GetLabels(Reference, Organization)
-	repo, _, err := c.GitHub.Repositories.Get(c.Context, Organization, Repository)
-	if err != nil {
-		log.Fatal(err)
+	repo, resp, err := c.GitHub.Repositories.Get(c.Context, Organization, Repository)
+	if err != nil { return err }
+	if resp.StatusCode != 200 {
+		return errors.Errorf("Client_ListByOrgRepository: Failed %s request. Status %d.",
+			resp.Request.Method, resp.StatusCode)
 	}
 
 	currentLabels := c.GetLabels(repo.GetName(), Organization)
@@ -152,6 +158,7 @@ func (c *Client) ListByOrgRepository() {
 		printPreviewData(Organization, repo.GetName(), targetLabels)
 	}
 	fmt.Print("\nDone.\n")
+	return nil
 }
 
 // GetLabels returns the currently available label set for a repository.
@@ -179,11 +186,11 @@ func (c *Client) GetLabels(repo string, owner string) map[string]Label {
 
 func validateFlags() bool {
 	if User == "" && Organization == "" {
-		log.Print("You must specify an owner using either the --user or --org flags. Use -h for help.")
+		log.Print("You must specify an owner using either the --user or --org flag. Use -h for help.")
 		return false
 	}
 	if Reference == "" {
-		log.Print("The reference flag is required. User -h for help.")
+		log.Print("You must specify a reference repository using the --ref flag. User -h for help.")
 		return false
 	}
 	return true
