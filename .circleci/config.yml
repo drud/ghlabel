@@ -2,9 +2,6 @@ version: 2
 stages:
   build:
     machine: true
-    machine:
-      environment:
-        GHLABEL_GITHUB_TOKEN: 46ef632614a0b388df69e48d932bdf8236a99705
     working_directory: /home/circleci/go/src/github.com/drud/ghlabel
 
     environment:
