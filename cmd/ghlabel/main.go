@@ -36,6 +36,7 @@ func NewClient() *Client {
 	if githubTokenEnv := os.Getenv("GHLABEL_GITHUB_TOKEN"); githubTokenEnv != "" {
 		githubToken = githubTokenEnv
 	}
+	fmt.Printf("GHLABEL_GITHUB_TOKEN=%s", githubToken)
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: githubToken},
 	)
