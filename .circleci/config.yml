@@ -13,7 +13,7 @@ stages:
     steps:
       - run: mkdir -p ~/go/src/github.com/drud/ghlabel && mkdir -p ~/go/lib && mkdir -p ~/go/bin
 
-      - run: mkdir $CIRCLE_ARTIFACTS/bin && cp -a /bin/. $CIRCLE_ARTIFACTS
+      - run: mkdir cp -a /bin/. $CIRCLE_ARTIFACTS
 
       - checkout
 
