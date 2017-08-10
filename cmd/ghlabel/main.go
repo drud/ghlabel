@@ -45,7 +45,7 @@ func NewClient() *Client {
 }
 
 // ListByUser lists repositories for a user.
-func (c *Client) ListByUser() {
+func (c *Client) ListByUser() error {
 	if !Run {
 		printPreviewHeader()
 	}
@@ -55,8 +55,10 @@ func (c *Client) ListByUser() {
 	}
 	for {
 		repos, resp, err := c.GitHub.Repositories.List(c.Context, User, opt)
-		if err != nil {
-			log.Fatal(err)
+		if err != nil { return err }
+		if resp.StatusCode != 200 {
+			return errors.Errorf("Client_ListByOrg: Failed %s request. Status %d.",
+				resp.Request.Method, resp.StatusCode)
 		}
 
 		for _, repo := range repos {
@@ -74,17 +76,20 @@ func (c *Client) ListByUser() {
 		opt.ListOptions.Page = resp.NextPage
 	}
 	fmt.Print("\nDone.\n")
+	return nil
 }
 
 // ListByUserRepository lists a single repository for a user.
-func (c *Client) ListByUserRepository() {
+func (c *Client) ListByUserRepository() error {
 	if !Run {
 		printPreviewHeader()
 	}
 	referenceLabels := c.GetLabels(Reference, User)
-	repo, _, err := c.GitHub.Repositories.Get(c.Context, User, Repository)
-	if err != nil {
-		log.Fatal(err)
+	repo, resp, err := c.GitHub.Repositories.Get(c.Context, User, Repository)
+	if err != nil { return err }
+	if resp.StatusCode != 200 {
+		return errors.Errorf("Client_ListByUserRepository: Failed %s request. Status %d.",
+			resp.Request.Method, resp.StatusCode)
 	}
 
 	currentLabels := c.GetLabels(repo.GetName(), User)
@@ -97,6 +102,7 @@ func (c *Client) ListByUserRepository() {
 		printPreviewData(User, repo.GetName(), targetLabels)
 	}
 	fmt.Print("\nDone.\n")
+	return nil
 }
 
 // ListByOrg lists repositories for an organization.

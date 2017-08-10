@@ -3,29 +3,28 @@ package main
 import (
 	"testing"
 
-	"github.com/google/go-github/github"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	repo1   = "test-ghlabel"
 	orgName = "ghlabel"
+	usrName = "nmccrory"
 	client = NewClient()
 )
 
 func TestClient_ListByUser(t *testing.T) {
 	Reference = "community"
-	User = orgName
+	User = usrName
 
-	assert.NoError(t, client.ListByOrgRepository(), "ListByOrgRepository() returned an error.")
+	assert.NoError(t, client.ListByUser(), "ListByOrg() returned an error.")
 }
 
 func TestClient_ListByUserRepository(t *testing.T) {
 	Reference = "community"
-	Repository = "junkrepo"
-	User = orgName
+	Repository = "ghlabel"
+	User = usrName
 
-	assert.NoError(t, client.ListByOrgRepository(), "ListByOrgRepository() returned an error.")
+	assert.NoError(t, client.ListByUserRepository(), "ListByOrgRepository() returned an error.")
 }
 
 func TestClient_ListByOrg(t *testing.T) {
@@ -35,6 +34,7 @@ func TestClient_ListByOrg(t *testing.T) {
 	assert.NoError(t, client.ListByOrg(), "ListByOrg() returned an error.")
 }
 
+// TestClient_ListByOrgRepository
 func TestClient_ListByOrgRepository(t *testing.T) {
 	Reference = "community"
 	Repository = "junkrepo"
@@ -52,18 +52,4 @@ func TestClient_GetLabels(t *testing.T) {
 	for actual, _ := range actualLabels {
 		assert.Contains(t, expectedLabels, actual, "GetLabels() Test failed.")
 	}
-}
-
-func createRepo(org string, name string) (*github.Repository, *github.Response, error) {
-	repo := &github.Repository{
-		Name:      github.String(name),
-		Private:   github.Bool(true),
-		HasIssues: github.Bool(true),
-	}
-
-	return client.GitHub.Repositories.Create(client.Context, org, repo)
-}
-
-func deleteRepo(org string, name string) (*github.Response, error) {
-	return client.GitHub.Repositories.Delete(client.Context, org, name)
 }
