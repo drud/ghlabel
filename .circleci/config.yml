@@ -19,3 +19,6 @@ stages:
 
       - run: make -s gofmt golint
       - run: make test
+
+    artifacts:
+      - "bin"
