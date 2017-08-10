@@ -8,8 +8,8 @@ import (
 
 var (
 	orgName = "ghlabel"
-	usrName = "nmccrory"
-	client = NewClient()
+	usrName = "drud-ghlabel-test"
+	client  = NewClient()
 )
 
 func TestClient_ListByUser(t *testing.T) {
@@ -21,7 +21,7 @@ func TestClient_ListByUser(t *testing.T) {
 
 func TestClient_ListByUserRepository(t *testing.T) {
 	Reference = "community"
-	Repository = "ghlabel"
+	Repository = "junkrepo"
 	User = usrName
 
 	assert.NoError(t, client.ListByUserRepository(), "ListByOrgRepository() returned an error.")
@@ -46,10 +46,10 @@ func TestClient_ListByOrgRepository(t *testing.T) {
 // TestClient_GetLabels makes sure values returned by GetLabels are contained
 func TestClient_GetLabels(t *testing.T) {
 	expectedLabels := []string{"actionable", "hibernate", "showstopper", "incubate",
-	"work in progress", "security", "needs decision", "needs tests", "needs docs"}
+		"work in progress", "security", "needs decision", "needs tests", "needs docs"}
 	actualLabels := client.GetLabels("community", orgName)
 
-	for actual, _ := range actualLabels {
+	for actual := range actualLabels {
 		assert.Contains(t, expectedLabels, actual, "GetLabels() Test failed.")
 	}
 }

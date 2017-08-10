@@ -9,8 +9,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/google/go-github/github"
-	"golang.org/x/oauth2"
 	"github.com/pkg/errors"
+	"golang.org/x/oauth2"
 )
 
 // Label represents information about a GitHub issue label.
@@ -28,13 +28,18 @@ type Client struct {
 	Context context.Context
 	// Authenticated GitHub API client.
 	GitHub *github.Client
-	// User data
 }
 
 // NewClient is the preferred method for making a new authenticated Client.
 func NewClient() *Client {
 	ctx := context.Background()
-	githubToken := os.Getenv("GITHUB_TOKEN")
+	var githubToken string
+	if os.Getenv("CIRCLECI") == "true" {
+		githubToken = os.Getenv("GHLABEL_GITHUB_TOKEN")
+	} else {
+		githubToken = os.Getenv("GITHUB_TOKEN")
+	}
+
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: githubToken},
 	)
@@ -55,7 +60,9 @@ func (c *Client) ListByUser() error {
 	}
 	for {
 		repos, resp, err := c.GitHub.Repositories.List(c.Context, User, opt)
-		if err != nil { return err }
+		if err != nil {
+			return err
+		}
 		if resp.StatusCode != 200 {
 			return errors.Errorf("Client_ListByOrg: Failed %s request. Status %d.",
 				resp.Request.Method, resp.StatusCode)
@@ -86,7 +93,9 @@ func (c *Client) ListByUserRepository() error {
 	}
 	referenceLabels := c.GetLabels(Reference, User)
 	repo, resp, err := c.GitHub.Repositories.Get(c.Context, User, Repository)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	if resp.StatusCode != 200 {
 		return errors.Errorf("Client_ListByUserRepository: Failed %s request. Status %d.",
 			resp.Request.Method, resp.StatusCode)
@@ -117,7 +126,9 @@ func (c *Client) ListByOrg() error {
 	}
 	for {
 		repos, resp, err := c.GitHub.Repositories.ListByOrg(c.Context, Organization, opt)
-		if err != nil { return err }
+		if err != nil {
+			return err
+		}
 		if resp.StatusCode != 200 {
 			return errors.Errorf("Client_ListByOrg: Failed %s request. Status %d.",
 				resp.Request.Method, resp.StatusCode)
@@ -148,7 +159,9 @@ func (c *Client) ListByOrgRepository() error {
 	}
 	referenceLabels := c.GetLabels(Reference, Organization)
 	repo, resp, err := c.GitHub.Repositories.Get(c.Context, Organization, Repository)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	if resp.StatusCode != 200 {
 		return errors.Errorf("Client_ListByOrgRepository: Failed %s request. Status %d.",
 			resp.Request.Method, resp.StatusCode)
