@@ -6,6 +6,7 @@ stages:
 
     environment:
       GOPATH: /home/circleci/go
+      GHLABEL_GITHUB_TOKEN: $GHLABEL_GITHUB_TOKEN
 
     steps:
       - run: mkdir -p ~/go/src/github.com/drud/ghlabel && mkdir -p ~/go/lib && mkdir -p ~/go/bin
