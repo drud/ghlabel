@@ -9,7 +9,6 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/google/go-github/github"
-	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 )
 
@@ -33,13 +32,7 @@ type Client struct {
 // NewClient is the preferred method for making a new authenticated Client.
 func NewClient() *Client {
 	ctx := context.Background()
-	var githubToken string
-	if os.Getenv("CIRCLECI") == "true" {
-		githubToken = os.Getenv("GHLABEL_GITHUB_TOKEN")
-	} else {
-		githubToken = os.Getenv("GITHUB_TOKEN")
-	}
-
+	githubToken := os.Getenv("GHLABEL_GITHUB_TOKEN")
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: githubToken},
 	)
@@ -64,7 +57,7 @@ func (c *Client) ListByUser() error {
 			return err
 		}
 		if resp.StatusCode != 200 {
-			return errors.Errorf("Client_ListByOrg: Failed %s request. Status %d.",
+			return fmt.Errorf("client_ListByUser: Failed %s request. Status %d",
 				resp.Request.Method, resp.StatusCode)
 		}
 
@@ -97,7 +90,7 @@ func (c *Client) ListByUserRepository() error {
 		return err
 	}
 	if resp.StatusCode != 200 {
-		return errors.Errorf("Client_ListByUserRepository: Failed %s request. Status %d.",
+		return fmt.Errorf("client_ListByUserRepository: Failed %s request. Status %d",
 			resp.Request.Method, resp.StatusCode)
 	}
 
@@ -130,7 +123,7 @@ func (c *Client) ListByOrg() error {
 			return err
 		}
 		if resp.StatusCode != 200 {
-			return errors.Errorf("Client_ListByOrg: Failed %s request. Status %d.",
+			return fmt.Errorf("client_ListByOrg: Failed %s request. Status %d",
 				resp.Request.Method, resp.StatusCode)
 		}
 
@@ -163,7 +156,7 @@ func (c *Client) ListByOrgRepository() error {
 		return err
 	}
 	if resp.StatusCode != 200 {
-		return errors.Errorf("Client_ListByOrgRepository: Failed %s request. Status %d.",
+		return fmt.Errorf("client_ListByOrgRepository: Failed %s request. Status %d",
 			resp.Request.Method, resp.StatusCode)
 	}
 

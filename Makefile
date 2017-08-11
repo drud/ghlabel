@@ -1,6 +1,6 @@
 # Makefile for a standard repo with associated container
 
-##### These variables need to be adjusted in most repositories #####
+#### These variables need to be adjusted in most repositories #####
 
 # This repo's root import path (under GOPATH).
 PKG := github.com/drud/ghlabel
@@ -51,6 +51,12 @@ include build-tools/makefile_components/base_test_go.mak
 
 # Additional targets can be added here
 # Also, existing targets can be overridden by copying and customizing them.
+
+# Override test section so tests may use environment variables.
+# Test target necessary for the GitHub API token.
+test: build
+	cd $(PWD)/cmd/ghlabel && \
+	go test .
 
 release:
 	@echo "Packaging release: "
