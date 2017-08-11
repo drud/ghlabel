@@ -32,7 +32,7 @@ type Client struct {
 // NewClient is the preferred method for making a new authenticated Client.
 func NewClient() *Client {
 	ctx := context.Background()
-	githubToken := os.Getenv("GHLABEL_GITHUB_TOKEN")
+	githubToken := os.Getenv("GITHUB_TOKEN")
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: githubToken},
 	)
