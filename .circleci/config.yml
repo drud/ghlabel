@@ -17,5 +17,5 @@ stages:
       - run: make -s gofmt golint
       - run: make test
       - store_artifacts:
-                path: /go/bin
+                path: /go/src/github.com/drud/ghlabel/bin
                 name: Artifact storage
