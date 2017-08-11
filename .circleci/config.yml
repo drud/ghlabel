@@ -9,7 +9,7 @@ stages:
 
     steps:
       - run: mkdir -p ~/go/src/github.com/drud/ghlabel && mkdir -p ~/go/lib && mkdir -p ~/go/bin
-      - run: cp ~/go/bin $CIRCLE_ARTIFACTS
+      - run: cp ~/go/bin $(CIRCLE_ARTIFACTS)
       - checkout
 
       - run: make linux
