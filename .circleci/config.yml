@@ -9,12 +9,12 @@ stages:
 
     steps:
       - run: mkdir -p ~/go/src/github.com/drud/ghlabel && mkdir -p ~/go/lib && mkdir -p ~/go/bin
-      
+
       - checkout
 
       - run: make linux
       - run: make -s gofmt golint
       - run: make test
       - store_artifacts:
-                path: /go/src/github.com/drud/ghlabel/bin
+                path: $GOPATH/src/github.com/drud/ghlabel/bin
                 name: Artifact storage
