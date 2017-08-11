@@ -17,5 +17,5 @@ stages:
       - run: make -s gofmt golint
       - run: make test
       - store_artifacts:
-                path: /bin
+                path: /go/bin
                 name: Artifact storage
