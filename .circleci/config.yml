@@ -6,12 +6,16 @@ stages:
 
     environment:
       GOPATH: /home/circleci/go
+      ARTIFACTS: /artifacts
 
     steps:
       - run: mkdir -p ~/go/src/github.com/drud/ghlabel && mkdir -p ~/go/lib && mkdir -p ~/go/bin
-      - run: cp ~/go/bin $(CIRCLE_ARTIFACTS)
+      - run: cp -r ~/go/bin /artifacts
       - checkout
 
       - run: make linux
       - run: make -s gofmt golint
       - run: make test
+      - store_artifacts:
+                path: /artifacts
+                name: Artifact storage
