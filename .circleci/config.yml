@@ -10,7 +10,8 @@ stages:
 
     steps:
       - run: mkdir -p ~/go/src/github.com/drud/ghlabel && mkdir -p ~/go/lib && mkdir -p ~/go/bin
-      - run: cp -r ~/go/bin /artifacts
+      - run: mkdir -p ~/artifacts
+      - run: cp -r ~/go/bin ~/artifacts
       - checkout
 
       - run: make linux
