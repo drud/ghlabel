@@ -10,6 +10,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
+	"net/http"
 )
 
 // Label represents information about a GitHub issue label.
@@ -56,7 +57,7 @@ func (c *Client) ListByUser() error {
 		if err != nil {
 			return err
 		}
-		if resp.StatusCode != 200 {
+		if resp.StatusCode != http.StatusOK {
 			return fmt.Errorf("client_ListByUser: Failed %s request. Status %d",
 				resp.Request.Method, resp.StatusCode)
 		}
@@ -89,7 +90,7 @@ func (c *Client) ListByUserRepository() error {
 	if err != nil {
 		return err
 	}
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("client_ListByUserRepository: Failed %s request. Status %d",
 			resp.Request.Method, resp.StatusCode)
 	}
@@ -122,7 +123,7 @@ func (c *Client) ListByOrg() error {
 		if err != nil {
 			return err
 		}
-		if resp.StatusCode != 200 {
+		if resp.StatusCode != http.StatusOK {
 			return fmt.Errorf("client_ListByOrg: Failed %s request. Status %d",
 				resp.Request.Method, resp.StatusCode)
 		}
@@ -155,7 +156,7 @@ func (c *Client) ListByOrgRepository() error {
 	if err != nil {
 		return err
 	}
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("client_ListByOrgRepository: Failed %s request. Status %d",
 			resp.Request.Method, resp.StatusCode)
 	}
