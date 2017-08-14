@@ -3,11 +3,21 @@ package main
 import (
 	"github.com/spf13/cobra"
 	"os"
+	"log"
+)
+
+// Globally accessible flags
+var (
+	User         string
+	Organization string
+	Repository   string
+	Reference    string
+	Run          bool
 )
 
 // RootCmd is the Cobra root for ghlabel command.
 var RootCmd = &cobra.Command{
-	Use:   "ghlabel",
+	Use:   "ghlabel --owner --reference -flags",
 	Short: "ghlabel automatically manages issue labels.",
 	Long: `GitHub Label (ghlabel) automatically updates
 			a user or organization's GitHub issue labels.`,
@@ -18,33 +28,23 @@ var RootCmd = &cobra.Command{
 		}
 		// Create a new ghlabel Client.
 		client := NewClient()
-		if User != "" {
-			if Repository != "" {
-				client.ListByUserRepository()
-				return
-			}
+		if User != "" && Repository != "" {
+			// If we have both a user and repository then we run the tool on just that repository.
+			client.ListByUserRepository()
+		} else if User != "" {
+			// If we Just have a user but no repository, then run the tool for all repositories for that user.
 			client.ListByUser()
-			return
-		}
-		if Organization != "" {
-			if Repository != "" {
-				client.ListByOrgRepository()
-				return
-			}
+		} else if Organization != "" && Repository != "" {
+			// If we have an org and a repository, run the tool for just that repository.
+			client.ListByOrgRepository()
+		} else if Organization != "" {
+			// If we just have an org and no repository, run the tool on all repos in that org.
 			client.ListByOrg()
-			return
+		} else {
+			log.Fatal("You must specify either an organization or user. Use -h for help.")
 		}
 	},
 }
-
-// Globally accessible flags
-var (
-	User         string
-	Organization string
-	Repository   string
-	Reference    string
-	Run          bool
-)
 
 func init() {
 	RootCmd.PersistentFlags().StringVarP(&User, "user", "u", "", "The user that owns the repositories")

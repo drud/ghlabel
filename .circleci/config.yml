@@ -13,7 +13,7 @@ stages:
       - checkout
 
       - run: make linux
-      - run: make -s gofmt golint
+      - run: make staticcheck
       - run: make test
       - store_artifacts:
                 path: bin

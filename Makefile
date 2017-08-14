@@ -52,6 +52,10 @@ include build-tools/makefile_components/base_test_go.mak
 # Additional targets can be added here
 # Also, existing targets can be overridden by copying and customizing them.
 
+# Staticcheck target for running golint and gofmt
+staticcheck:
+	make -s gofmt golint
+
 # Override test section so tests may use environment variables.
 # Test target necessary for the GitHub API token.
 test: build
