@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/spf13/cobra"
-	"os"
 	"log"
+	"os"
 )
 
 // Globally accessible flags
