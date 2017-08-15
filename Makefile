@@ -61,6 +61,3 @@ staticcheck:
 test: build
 	cd $(PWD)/cmd/ghlabel && \
 	go test .
-
-release:
-	@echo "Packaging release: "

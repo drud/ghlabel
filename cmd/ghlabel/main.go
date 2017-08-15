@@ -49,7 +49,7 @@ func NewClient() *Client {
 
 // ListByUser lists repositories for a user.
 func (c *Client) ListByUser() error {
-	if !Run {
+	if !ApplyLabels {
 		printPreviewHeader()
 	}
 	referenceLabels := c.GetLabels(Reference, User)
@@ -70,7 +70,7 @@ func (c *Client) ListByUser() error {
 			currentLabels := c.GetLabels(repo.GetName(), User)
 			targetLabels := processLabels(referenceLabels, currentLabels)
 			// If the run flag was used, execute the staged label changes
-			if Run {
+			if ApplyLabels {
 				commit(c.Context, c.GitHub, User, repo.GetName(), targetLabels)
 			}
 			printPreviewData(User, repo.GetName(), targetLabels)
@@ -86,7 +86,7 @@ func (c *Client) ListByUser() error {
 
 // ListByUserRepository lists a single repository for a user.
 func (c *Client) ListByUserRepository() error {
-	if !Run {
+	if !ApplyLabels {
 		printPreviewHeader()
 	}
 	referenceLabels := c.GetLabels(Reference, User)
@@ -103,7 +103,7 @@ func (c *Client) ListByUserRepository() error {
 	targetLabels := processLabels(referenceLabels, currentLabels)
 
 	// If the run flag was used, execute the staged label changes
-	if Run {
+	if ApplyLabels {
 		commit(c.Context, c.GitHub, User, repo.GetName(), targetLabels)
 	} else {
 		printPreviewData(User, repo.GetName(), targetLabels)
@@ -114,7 +114,7 @@ func (c *Client) ListByUserRepository() error {
 
 // ListByOrg lists repositories for an organization.
 func (c *Client) ListByOrg() error {
-	if !Run {
+	if !ApplyLabels {
 		printPreviewHeader()
 	}
 	referenceLabels := c.GetLabels(Reference, Organization)
@@ -136,7 +136,7 @@ func (c *Client) ListByOrg() error {
 			currentLabels := c.GetLabels(repo.GetName(), Organization)
 			targetLabels := processLabels(referenceLabels, currentLabels)
 			// If the run flag was used, execute the staged label changes
-			if Run {
+			if ApplyLabels {
 				commit(c.Context, c.GitHub, Organization, repo.GetName(), targetLabels)
 			}
 			printPreviewData(Organization, repo.GetName(), targetLabels)
@@ -152,7 +152,7 @@ func (c *Client) ListByOrg() error {
 
 // ListByOrgRepository lists a single repository for an organization.
 func (c *Client) ListByOrgRepository() error {
-	if !Run {
+	if !ApplyLabels {
 		printPreviewHeader()
 	}
 	referenceLabels := c.GetLabels(Reference, Organization)
@@ -169,7 +169,7 @@ func (c *Client) ListByOrgRepository() error {
 	targetLabels := processLabels(referenceLabels, currentLabels)
 
 	// If the run flag was used, execute the staged label changes
-	if Run {
+	if ApplyLabels {
 		commit(c.Context, c.GitHub, Organization, repo.GetName(), targetLabels)
 	} else {
 		printPreviewData(Organization, repo.GetName(), targetLabels)
@@ -218,7 +218,7 @@ func printPreviewHeader() {
 	fmt.Println("Description:")
 	fmt.Println("  View currently staged label updates.\n")
 	fmt.Println("Instructions:")
-	fmt.Println("  To apply label changes, use the -r flag.\n")
+	fmt.Println("  To apply label changes, use the -a flag.\n")
 }
 
 func printPreviewData(owner, repo string, targetLabels map[string]Label) {

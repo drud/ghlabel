@@ -12,7 +12,7 @@ var (
 	Organization string
 	Repository   string
 	Reference    string
-	Run          bool
+	ApplyLabels  bool
 )
 
 // RootCmd is the Cobra root for ghlabel command.
@@ -50,8 +50,8 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&User, "user", "u", "", "The user that owns the repositories")
 	RootCmd.PersistentFlags().StringVarP(&Organization, "org", "o", "", "The organization that owns the repositories.")
 	RootCmd.PersistentFlags().StringVarP(&Repository, "repo", "", "", "A specific repository to sync.")
-	RootCmd.PersistentFlags().StringVarP(&Reference, "ref", "", "", "Required: the repository to replicate labels from.")
-	RootCmd.PersistentFlags().BoolVarP(&Run, "run", "", false, "Run currently staged label updates.")
+	RootCmd.PersistentFlags().StringVarP(&Reference, "ref", "", "", "Required: the repository from which to replicate labels.")
+	RootCmd.PersistentFlags().BoolVarP(&ApplyLabels, "apply", "a", false, "Apply currently staged label changes.")
 }
 
 // Execute runs Cobra
