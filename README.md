@@ -6,7 +6,7 @@ Ghlabel is a tool that automatically standardizes GitHub issue labels across a u
 A reference repository is used as the template for labels, and those labels are automatically copied to all or
 a single repository.
 
-## Setup
+## Quickstart
 Before getting started, you need to have an API token from GitHub to access any repositories. If you don't already have
 a token, you can get one [here](https://github.com/settings/tokens).
 
