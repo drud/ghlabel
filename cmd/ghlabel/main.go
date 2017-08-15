@@ -34,6 +34,10 @@ type Client struct {
 func NewClient() *Client {
 	ctx := context.Background()
 	githubToken := os.Getenv("GHLABEL_GITHUB_TOKEN")
+	if githubToken == "" {
+		log.Fatal("NewClient error: Please provide a GitHub API token.")
+		os.Exit(1)
+	}
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: githubToken},
 	)
