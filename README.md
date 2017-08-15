@@ -24,7 +24,7 @@ Ghlabel runs in preview mode by default.:
 ```
 ./ghlabel --org=drud --ref=community
 ```
-You can execute changes using -r.
+You can execute changes using -run.
 ```
 ./ghlabel --org=drud --ref=community -run
 ```
