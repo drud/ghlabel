@@ -196,7 +196,6 @@ func (c *Client) GetLabels(repo string, owner string) map[string]Label {
 			break
 		}
 		opt.Page = resp.NextPage
-		break
 	}
 	return labelsMap
 }
