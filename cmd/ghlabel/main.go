@@ -114,7 +114,9 @@ func (c *Client) ListByUserRepository() error {
 
 // ListByOrg lists repositories for an organization.
 func (c *Client) ListByOrg() error {
-	if !ApplyLabels {
+	if ApplyLabels {
+		printCommitHeader()
+	}else{
 		printPreviewHeader()
 	}
 	referenceLabels := c.GetLabels(Reference, Organization)
@@ -136,10 +138,12 @@ func (c *Client) ListByOrg() error {
 			currentLabels := c.GetLabels(repo.GetName(), Organization)
 			targetLabels := processLabels(referenceLabels, currentLabels)
 			// If the run flag was used, execute the staged label changes
+
 			if ApplyLabels {
 				commit(c.Context, c.GitHub, Organization, repo.GetName(), targetLabels)
+			}else {
+				printPreviewData(Organization, repo.GetName(), targetLabels)
 			}
-			printPreviewData(Organization, repo.GetName(), targetLabels)
 		}
 		if resp.NextPage == 0 {
 			break
@@ -212,6 +216,10 @@ func validateFlags() bool {
 	return true
 }
 
+func printCommitHeader() {
+	color.Cyan("Applying label changes...\n\n")
+}
+
 func printPreviewHeader() {
 	color.Yellow("Running in preview mode...\n\n")
 	fmt.Println("Description:")
@@ -228,7 +236,8 @@ func printPreviewData(owner, repo string, targetLabels map[string]Label) {
 		color.Green("%s\n", string(r))
 		return
 	}
-	fmt.Printf("\rScanning repository: %-36s", repo)
+	fmt.Print("Scanning repositories...")
+	fmt.Printf("%-36s\n", repo)
 }
 
 func commit(ctx context.Context, client *github.Client, owner string, repo string, labels map[string]Label) {
@@ -244,15 +253,23 @@ func commit(ctx context.Context, client *github.Client, owner string, repo strin
 		label.Color = &color
 		label.URL = &url
 		label.Name = &name
-
 		if v.Action == "edit" {
-			client.Issues.EditLabel(ctx, owner, repo, v.Name, label)
+			_, err, _ := client.Issues.EditLabel(ctx, owner, repo, v.Name, label)
+			if err != nil {
+				log.Fatal("Failed to apply label changes.")
+			}
 		}
 		if v.Action == "create" {
-			client.Issues.CreateLabel(ctx, owner, repo, label)
+			_, err, _ := client.Issues.CreateLabel(ctx, owner, repo, label)
+			if err != nil {
+				log.Fatal("Failed to apply label changes.")
+			}
 		}
 		if v.Action == "delete" {
-			client.Issues.DeleteLabel(ctx, owner, repo, v.Name)
+			_, err := client.Issues.DeleteLabel(ctx, owner, repo, v.Name)
+			if err != nil {
+				log.Fatal("Failed to apply label changes.")
+			}
 		}
 	}
 }
