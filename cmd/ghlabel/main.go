@@ -275,21 +275,21 @@ func commit(ctx context.Context, client *github.Client, owner string, repo strin
 		if v.Action == "edit" {
 			_, _, err := client.Issues.EditLabel(ctx, owner, repo, v.Name, label)
 			if err != nil {
-				log.Fatalf("%s. Failed to apply label changes.", err.Error())
+				log.Printf("%s. Failed to apply label changes.", err.Error())
 				return err
 			}
 		}
 		if v.Action == "create" {
 			_, _, err := client.Issues.CreateLabel(ctx, owner, repo, label)
 			if err != nil {
-				log.Fatalf("%s. Failed to apply label changes.", err.Error())
+				log.Printf("%s. Failed to apply label changes.", err.Error())
 				return err
 			}
 		}
 		if v.Action == "delete" {
 			_, err := client.Issues.DeleteLabel(ctx, owner, repo, v.Name)
 			if err != nil {
-				log.Fatalf("%s. Failed to apply label changes.", err.Error())
+				log.Printf("%s. Failed to apply label changes.", err.Error())
 				return err
 			}
 		}
