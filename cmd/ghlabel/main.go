@@ -49,7 +49,9 @@ func NewClient() *Client {
 
 // ListByUser lists repositories for a user.
 func (c *Client) ListByUser() error {
-	if !ApplyLabels {
+	if ApplyLabels {
+		printCommitHeader()
+	}else{
 		printPreviewHeader()
 	}
 	referenceLabels := c.GetLabels(Reference, User)
@@ -72,8 +74,9 @@ func (c *Client) ListByUser() error {
 			// If the run flag was used, execute the staged label changes
 			if ApplyLabels {
 				commit(c.Context, c.GitHub, User, repo.GetName(), targetLabels)
+			}else{
+				printPreviewData(User, repo.GetName(), targetLabels)
 			}
-			printPreviewData(User, repo.GetName(), targetLabels)
 		}
 		if resp.NextPage == 0 {
 			break
@@ -86,7 +89,9 @@ func (c *Client) ListByUser() error {
 
 // ListByUserRepository lists a single repository for a user.
 func (c *Client) ListByUserRepository() error {
-	if !ApplyLabels {
+	if ApplyLabels {
+		printCommitHeader()
+	}else{
 		printPreviewHeader()
 	}
 	referenceLabels := c.GetLabels(Reference, User)
@@ -156,7 +161,9 @@ func (c *Client) ListByOrg() error {
 
 // ListByOrgRepository lists a single repository for an organization.
 func (c *Client) ListByOrgRepository() error {
-	if !ApplyLabels {
+	if ApplyLabels {
+		printCommitHeader()
+	}else{
 		printPreviewHeader()
 	}
 	referenceLabels := c.GetLabels(Reference, Organization)

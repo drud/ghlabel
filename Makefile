@@ -45,7 +45,7 @@ include build-tools/makefile_components/base_build_go.mak
 #include build-tools/makefile_components/base_build_python-docker.mak
 include build-tools/makefile_components/base_container.mak
 include build-tools/makefile_components/base_push.mak
-include build-tools/makefile_components/base_test_go.mak
+#include build-tools/makefile_components/base_test_go.mak
 #include build-tools/makefile_components/base_test_python.mak
 
 
@@ -54,6 +54,5 @@ include build-tools/makefile_components/base_test_go.mak
 
 # Override test section so tests may use environment variables.
 # Test target necessary for the GitHub API token.
-test: build
-	cd $(PWD)/cmd/ghlabel && \
-	go test .
+test: 
+	go test -v -installsuffix static -ldflags '$(LDFLAGS)' $(SRC_AND_UNDER) $(TESTARGS)
