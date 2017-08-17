@@ -54,5 +54,5 @@ include build-tools/makefile_components/base_push.mak
 
 # Override test section so tests may use environment variables.
 # Test target necessary for the GitHub API token.
-test: 
+test:
 	go test -v -installsuffix static -ldflags '$(LDFLAGS)' $(SRC_AND_UNDER) $(TESTARGS)

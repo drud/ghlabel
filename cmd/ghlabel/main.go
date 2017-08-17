@@ -73,7 +73,10 @@ func (c *Client) ListByUser() error {
 			targetLabels := processLabels(referenceLabels, currentLabels)
 			// If the run flag was used, execute the staged label changes
 			if ApplyLabels {
-				commit(c.Context, c.GitHub, User, repo.GetName(), targetLabels)
+				err := commit(c.Context, c.GitHub, User, repo.GetName(), targetLabels)
+				if err != nil {
+					return err
+				}
 			}else{
 				printPreviewData(User, repo.GetName(), targetLabels)
 			}
@@ -109,7 +112,10 @@ func (c *Client) ListByUserRepository() error {
 
 	// If the run flag was used, execute the staged label changes
 	if ApplyLabels {
-		commit(c.Context, c.GitHub, User, repo.GetName(), targetLabels)
+		err := commit(c.Context, c.GitHub, User, repo.GetName(), targetLabels)
+		if err != nil {
+			return err
+		}
 	} else {
 		printPreviewData(User, repo.GetName(), targetLabels)
 	}
@@ -145,7 +151,10 @@ func (c *Client) ListByOrg() error {
 			// If the run flag was used, execute the staged label changes
 
 			if ApplyLabels {
-				commit(c.Context, c.GitHub, Organization, repo.GetName(), targetLabels)
+				err := commit(c.Context, c.GitHub, Organization, repo.GetName(), targetLabels)
+				if err != nil {
+					return err
+				}
 			}else {
 				printPreviewData(Organization, repo.GetName(), targetLabels)
 			}
@@ -181,7 +190,10 @@ func (c *Client) ListByOrgRepository() error {
 
 	// If the run flag was used, execute the staged label changes
 	if ApplyLabels {
-		commit(c.Context, c.GitHub, Organization, repo.GetName(), targetLabels)
+		err := commit(c.Context, c.GitHub, Organization, repo.GetName(), targetLabels)
+		if err != nil {
+			return err
+		}
 	} else {
 		printPreviewData(Organization, repo.GetName(), targetLabels)
 	}
@@ -243,11 +255,11 @@ func printPreviewData(owner, repo string, targetLabels map[string]Label) {
 		color.Green("%s\n", string(r))
 		return
 	}
-	fmt.Print("Scanning repositories...")
-	fmt.Printf("%-36s\n", repo)
+	fmt.Print("Scanning repo...")
+	fmt.Printf("%s\n", repo)
 }
 
-func commit(ctx context.Context, client *github.Client, owner string, repo string, labels map[string]Label) {
+func commit(ctx context.Context, client *github.Client, owner string, repo string, labels map[string]Label) error {
 	for _, v := range labels {
 		label := new(github.Label)
 
@@ -261,24 +273,28 @@ func commit(ctx context.Context, client *github.Client, owner string, repo strin
 		label.URL = &url
 		label.Name = &name
 		if v.Action == "edit" {
-			_, err, _ := client.Issues.EditLabel(ctx, owner, repo, v.Name, label)
+			_, _, err := client.Issues.EditLabel(ctx, owner, repo, v.Name, label)
 			if err != nil {
-				log.Fatal("Failed to apply label changes.")
+				log.Fatalf("%s. Failed to apply label changes.", err.Error())
+				return err
 			}
 		}
 		if v.Action == "create" {
-			_, err, _ := client.Issues.CreateLabel(ctx, owner, repo, label)
+			_, _, err := client.Issues.CreateLabel(ctx, owner, repo, label)
 			if err != nil {
-				log.Fatal("Failed to apply label changes.")
+				log.Fatalf("%s. Failed to apply label changes.", err.Error())
+				return err
 			}
 		}
 		if v.Action == "delete" {
 			_, err := client.Issues.DeleteLabel(ctx, owner, repo, v.Name)
 			if err != nil {
-				log.Fatal("Failed to apply label changes.")
+				log.Fatalf("%s. Failed to apply label changes.", err.Error())
+				return err
 			}
 		}
 	}
+	return nil
 }
 
 func processLabels(parent map[string]Label, current map[string]Label) map[string]Label {

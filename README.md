@@ -18,13 +18,13 @@ $ make
 ```
 
 ## Usage
-The tool currently has two functions previewing staged label changes and applying them.
+The tool currently has two functions: previewing staged label changes and applying them.
 
-Ghlabel runs in preview mode by default.:
+As a safeguard, ghlabel runs in preview mode by default.
 ```
 ./ghlabel --org=drud --ref=community
 ```
-You can execute changes using -run.
+You can apply label changes using the `--apply` flag (or `-a` for short).
 ```
-./ghlabel --org=drud --ref=community -run
+./ghlabel --org=drud --ref=community --apply
 ```

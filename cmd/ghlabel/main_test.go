@@ -53,3 +53,19 @@ func TestClient_GetLabels(t *testing.T) {
 		assert.Contains(t, expectedLabels, actual, "GetLabels() Test failed.")
 	}
 }
+
+// Test_Commit confirms that the given GitHub token can commit label changes.
+func Test_Commit(t *testing.T) {
+	referenceLabels := client.GetLabels(Reference, Organization)
+	repo, _, err := client.GitHub.Repositories.Get(client.Context, Organization, Repository)
+	if err != nil {
+		t.Fatalf("err: %s\n", err)
+	}
+
+	currentLabels := client.GetLabels(repo.GetName(), Organization)
+	targetLabels := processLabels(referenceLabels, currentLabels)
+
+
+	assert.NoError(t, commit(client.Context, client.GitHub, orgName, "junkrepo", targetLabels),
+		"Failed to commit label changes.")
+}
