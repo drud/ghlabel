@@ -4,17 +4,22 @@ stages:
     machine: true
     working_directory: /home/circleci/go/src/github.com/drud/ghlabel
 
+
     environment:
       GOPATH: /home/circleci/go
-
+      ARTIFACTS: /artifacts
     steps:
       - run: mkdir -p ~/go/src/github.com/drud/ghlabel && mkdir -p ~/go/lib && mkdir -p ~/go/bin
 
       - checkout
 
-      - run: make linux
+      - run:
+          command: ./.circleci/generate_artifacts.sh $ARTIFACTS
+          name: tar/zip up artifacts and make hashes
+
       - run: make staticcheck
       - run: make test
+
       - store_artifacts:
-                path: bin
-                name: Artifact storage
+          path: /artifacts
+          name: Artifact storage
