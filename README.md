@@ -1,5 +1,5 @@
 # ghlabel
-[![CircleCI](https://circleci.com/gh/drud/ddev.svg?style=shield)](https://circleci.com/gh/drud/ddev) [![Go Report Card](https://goreportcard.com/badge/github.com/drud/ddev)](https://goreportcard.com/report/github.com/drud/ddev) ![project is maintained](https://img.shields.io/maintenance/yes/2017.svg)
+[![CircleCI](https://circleci.com/gh/drud/ghlabel.svg?style=shield)](https://circleci.com/gh/drud/ghlabel) [![Go Report Card](https://goreportcard.com/badge/github.com/drud/ghlabel)](https://goreportcard.com/report/github.com/drud/ghlabel) ![project is maintained](https://img.shields.io/maintenance/yes/2017.svg)
 
 Manually creating issue labels for each repository in an organization is a tedious and error prone process that simply doesn't scale.
 
