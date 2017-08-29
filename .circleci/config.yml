@@ -8,13 +8,14 @@ stages:
     environment:
       GOPATH: /home/circleci/go
       ARTIFACTS: /artifacts
+
     steps:
       - run: mkdir -p ~/go/src/github.com/drud/ghlabel && mkdir -p ~/go/lib && mkdir -p ~/go/bin
 
       - checkout
 
       - run:
-          command: ./.circleci/generate_artifacts.sh $ARTIFACTS
+          command: sh ./.circleci/generate_artifacts.sh $ARTIFACTS
           name: tar/zip up artifacts and make hashes
 
       - run: make staticcheck
