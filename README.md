@@ -10,7 +10,15 @@ a single repository in a GitHub organization or user's account.
 ## Quickstart
 Before getting started, you need to have an API token from GitHub to access any repositories. If you don't already have a token, you can get one [here](https://github.com/settings/tokens).
 
-After the environment variable for the GitHub token is set, you're ready to generate your system's binary. For ghlabel, we use `make` to generate the executables for all operating systems and architectures.
+After the environment variable for the GitHub token is set, you're ready to go.
+
+### Download and install
+
+#### Official release
+We recommend downloading ghlabel using the latest release which is available [here](https://github.com/drud/ghlabel/releases).
+
+### Manual install
+For ghlabel, we use `make` to generate the executables for all operating systems and architectures.
 ```
 $ export GHLABEL_GITHUB_TOKEN=1234...
 $ make
