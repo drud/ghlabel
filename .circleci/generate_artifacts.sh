@@ -21,7 +21,7 @@ zip $ARTIFACTS/ghlabel_linux.$VERSION.zip ghlabel
 # generate windows tarball/zipball
 cd $BASE_DIR/bin/windows/windows_amd64
 tar -czf $ARTIFACTS/ghlabel_windows.$VERSION.tar.gz ghlabel.exe
-zip $ARTIFACTS/ddev_windows.$VERSION.zip ddev.exe
+zip $ARTIFACTS/ghlabel_windows.$VERSION.zip ghlabel.exe
 
 # Create the sha256 files
 cd $ARTIFACTS
