@@ -51,7 +51,7 @@ func NewClient() *Client {
 func (c *Client) ListByUser() error {
 	if ApplyLabels {
 		printCommitHeader()
-	}else{
+	} else {
 		printPreviewHeader()
 	}
 	referenceLabels := c.GetLabels(Reference, User)
@@ -77,7 +77,7 @@ func (c *Client) ListByUser() error {
 				if err != nil {
 					return err
 				}
-			}else{
+			} else {
 				printPreviewData(User, repo.GetName(), targetLabels)
 			}
 		}
@@ -94,7 +94,7 @@ func (c *Client) ListByUser() error {
 func (c *Client) ListByUserRepository() error {
 	if ApplyLabels {
 		printCommitHeader()
-	}else{
+	} else {
 		printPreviewHeader()
 	}
 	referenceLabels := c.GetLabels(Reference, User)
@@ -127,7 +127,7 @@ func (c *Client) ListByUserRepository() error {
 func (c *Client) ListByOrg() error {
 	if ApplyLabels {
 		printCommitHeader()
-	}else{
+	} else {
 		printPreviewHeader()
 	}
 	referenceLabels := c.GetLabels(Reference, Organization)
@@ -155,7 +155,7 @@ func (c *Client) ListByOrg() error {
 				if err != nil {
 					return err
 				}
-			}else {
+			} else {
 				printPreviewData(Organization, repo.GetName(), targetLabels)
 			}
 		}
@@ -172,7 +172,7 @@ func (c *Client) ListByOrg() error {
 func (c *Client) ListByOrgRepository() error {
 	if ApplyLabels {
 		printCommitHeader()
-	}else{
+	} else {
 		printPreviewHeader()
 	}
 	referenceLabels := c.GetLabels(Reference, Organization)
@@ -242,9 +242,9 @@ func printCommitHeader() {
 func printPreviewHeader() {
 	color.Yellow("Running in preview mode...\n\n")
 	fmt.Println("Description:")
-	fmt.Println("  View currently staged label updates.\n")
+	fmt.Print("\n  View currently staged label updates.\n")
 	fmt.Println("Instructions:")
-	fmt.Println("  To apply label changes, use the -a flag.\n")
+	fmt.Print("\n  To apply label changes, use the -a flag.\n")
 }
 
 func printPreviewData(owner, repo string, targetLabels map[string]Label) {

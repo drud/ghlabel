@@ -65,7 +65,6 @@ func Test_Commit(t *testing.T) {
 	currentLabels := client.GetLabels(repo.GetName(), Organization)
 	targetLabels := processLabels(referenceLabels, currentLabels)
 
-
 	assert.NoError(t, commit(client.Context, client.GitHub, orgName, "junkrepo", targetLabels),
 		"Failed to commit label changes.")
 }

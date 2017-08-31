@@ -10,7 +10,9 @@ a single repository in a GitHub organization or user's account.
 
 ## Quickstart
 Before getting started, you need to have an API token from GitHub to access any repositories. If you don't already have a token, you can get one [here](https://github.com/settings/tokens).
-
+```
+$ export GHLABEL_GITHUB_TOKEN=1234...
+```
 After the environment variable for the GitHub token is set, you're ready to go.
 
 ### Download and install
@@ -21,8 +23,7 @@ We recommend downloading ghlabel using the latest release which is available [he
 ### Manual install
 For ghlabel, we use `make` to generate the executables for all operating systems and architectures.
 ```
-$ export GHLABEL_GITHUB_TOKEN=1234...
-$ make
+$ make {{linux, darwin, windows}}
 ```
 
 ## Usage
@@ -36,3 +37,5 @@ You can apply label changes using the `--apply` flag (or `-a` for short).
 ```
 ./ghlabel --org=drud --ref=community --apply
 ```
+
+Junk addition

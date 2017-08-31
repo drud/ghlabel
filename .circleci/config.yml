@@ -24,6 +24,7 @@ stages:
           name: tar/zip up artifacts and make hashes
 
       - run: make staticcheck
+      - run: make gometalinter
       - run: make test
 
       - store_artifacts:
